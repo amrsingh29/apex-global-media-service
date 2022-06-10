@@ -1,24 +1,12 @@
-FROM python:3.8.10-buster
+# syntax=docker/dockerfile:1
 
-WORKDIR /usr/src
+FROM python:3.8-slim-buster
 
-# ① Install some dependencies
-RUN apt-get update \
-    && apt-get install -y libsasl2-dev python-dev libldap2-dev libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-# ② Copy the setup script
-COPY setup.py .
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
 
-# ③ Make sure some dummy files are present for the setup script
-RUN touch README.md
-RUN mkdir scripts && touch scripts/ghcli
-
-# ④ Install the project dependencies to run the tests
-RUN python -m pip install -e ".[test]"
-
-# ⑤ Copy the source code
 COPY . .
 
-# ⑥ Volume when container is used as volume container
-VOLUME /usr/src
+CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=8181"]
